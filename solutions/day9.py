@@ -50,28 +50,40 @@ class State:
             offset[dynamic_dimension] -= sign
             new_distance = l1(self.head, self.tail)
 
-            if new_distance == 1:
-                if (
-                    self.head[static_dimension] == self.tail[static_dimension]
-                ):  # Being dragged behind
+            match (orig_distance, new_distance):
+                case (0, 1):
                     self.advance(target, sign, static_dimension, dynamic_dimension)
-                else:
-                    # else, now adjacent, but not behind relative to direction of motion
+                    # Moving from same space
+                case (1, 0):
+                    self.move(offset)  # Reversing direction, moving onto rope
+                case (1, 2):  # Either moving straight away, or beside -> diagonal
+                    if (
+                        self.head[static_dimension] == self.tail[static_dimension]
+                    ):  # Being dragged behind
+
+                        print("check")
+                        self.tail[static_dimension] = self.head[static_dimension]
+                        self.tail[dynamic_dimension] = (
+                            self.head[dynamic_dimension] - sign
+                        )
+                        self.touched[tuple(self.tail)] += 1
+                        self.advance(target, sign, static_dimension, dynamic_dimension)
+                    else:
+                        # else, adjacent ->diagonal
+                        self.move(offset)
+                case (2, 1):  # Diagonal to adjacent
                     self.move(offset)
 
-            elif new_distance == 0 or (
-                new_distance == 2 and orig_distance == 1
-            ):  # diagonal -> beside or beside -> overlap, so no tail movement
-                self.move(offset)
-            elif new_distance == 3:  # diagonal -> knight's move offset
-                # Only case where tail changes row and column
-                self.tail[static_dimension] = self.head[static_dimension]
-                self.tail[dynamic_dimension] = self.head[dynamic_dimension] - sign
-                # print(f"New tail: {self.tail}")
-                # One behind
-                self.touched[tuple(self.tail)] += 1
-                self.advance(target, sign, static_dimension, dynamic_dimension)
-        # sleep(1)
+                case (2, 3):
+                    # Only case where tail changes row and column
+                    self.tail[static_dimension] = self.head[static_dimension]
+                    self.tail[dynamic_dimension] = self.head[dynamic_dimension] - sign
+                    # print(f"New tail: {self.tail}")
+                    # One behind
+                    self.touched[tuple(self.tail)] += 1
+                    self.advance(target, sign, static_dimension, dynamic_dimension)
+                case _:
+                    raise ValueError("Unexpected value")
 
     def advance(self, target, sign, static_dimension, dynamic_dimension):
 
