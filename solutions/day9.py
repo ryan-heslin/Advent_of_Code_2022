@@ -11,6 +11,18 @@ directions = {
     "L": lambda x: (-x, 0),
     "U": lambda x: (0, x),
 }
+
+adjacents = [
+    [1, 1],
+    [-1, 1],
+    [-1, -1],
+    [1, -1],
+    [0, 1],
+    [1, 0],
+    [-1, 0],
+    [0, -1],
+    [0, 0],
+]
 # Tuple with index replaced with value
 def update_tuple(tupe, i, value):
     return (x if j != i else value for j, x in enumerate(tupe))
@@ -48,7 +60,6 @@ class State:
         # else -> error
         # (0, 0) is no-op
 
-        # breakpoint()
         if offset != [0, 0]:
             orig_distance = l1(self.head, self.tail)
             target = (self.head[0] + offset[0], self.head[1] + offset[1])
@@ -121,37 +132,30 @@ class Rope:
         self.head = self.knots[0]
         self.touched = set([(0, 0)])
         self.n_knots = knots
+        self.dimension = 2
 
     def move_knot(self, leading, trailing):
         new_distance = l1(leading, trailing)
         # if adjacent or diagonal, don't move
         #     breakpoint()
-        if new_distance >= 2 and not (
-            new_distance == 2
-            and leading[0] != trailing[0]
-            and leading[1] != trailing[1]
-        ):
-            # Simple drag-behind case
-            if leading[0] == trailing[0] or leading[1] == trailing[1]:
-                common_dimension = int(trailing[1] == leading[1])
-                different_dimension = (common_dimension + 1) % 2
-                trailing[different_dimension] = (
-                    leading[different_dimension] + trailing[different_dimension]
-                ) / 2
-                # print(trailing[different_dimension])
-            else:
-                far_dimension = int(abs(trailing[1] - leading[1]) == 2)
-                near_dimension = (far_dimension + 1) % 2
+        if new_distance >= 2:
+            diags = [
+                [trailing[i] + corner[i] for i in range(self.dimension)]
+                for corner in adjacents[:4]
+            ]
+            if new_distance > 2 or leading not in diags:
+                # Find and move to closest of 8 adjacent spaces
+                diags.extend(
+                    [
+                        [trailing[i] + corner[i] for i in range(self.dimension)]
+                        for corner in adjacents[4:]
+                    ]
+                )
+                new_location = min(diags, key=lambda coord: l1(coord, leading))
+                trailing[0] = new_location[0]
+                trailing[1] = new_location[1]
 
-                # Knight's move offset, so have to find 2-off and 1-off dimensions
-                # difference = trailing[far_dimension] - leading[far_dimension] // 2
-                trailing[near_dimension] = leading[near_dimension]
-                trailing[far_dimension] = (
-                    leading[far_dimension] + trailing[far_dimension]
-                ) / 2
-            if any(x % 1 != 0 for x in trailing):
-                print(leading)
-                raise ValueError()
+        # else, find closest adjacent space to next link and move to it
 
     def matrix(self):
         matrix = mask
@@ -174,7 +178,7 @@ class Rope:
                 self.move_knot(self.knots[i - 1], self.knots[i])
                 print("To " + str(self.knots[i]))
                 print("\n")
-                sleep(1)
+                # sleep(1)
 
             self.touched.add(tuple(self.knots[-1]))
             # Mark position 9
