@@ -125,10 +125,7 @@ class Rope:
     def move_knot(self, leading, trailing):
         new_distance = l1(leading, trailing)
         # if adjacent or diagonal, don't move
-        # if leading == [3, 0]:
         #     breakpoint()
-        if leading == [-6, 4.0]:
-            breakpoint()
         if new_distance >= 2 and not (
             new_distance == 2
             and leading[0] != trailing[0]
