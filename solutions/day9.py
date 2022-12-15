@@ -1,5 +1,4 @@
 from collections import defaultdict
-from time import sleep
 
 import numpy as np
 
@@ -173,12 +172,7 @@ class Rope:
             # Adjust each knot by known logica
             self.knots[0][dynamic_dimension] += sign
             for i in range(1, self.n_knots):
-                print(i)
-                print("From " + str(self.knots[i]))
                 self.move_knot(self.knots[i - 1], self.knots[i])
-                print("To " + str(self.knots[i]))
-                print("\n")
-                # sleep(1)
 
             self.touched.add(tuple(self.knots[-1]))
             # Mark position 9
@@ -195,7 +189,6 @@ for line in processed:
     first_state.move(list(line))
 
 part1 = len(first_state.touched.keys())
-# print("\n")
 print(part1)
 
 rope = Rope(knots=10)
@@ -204,5 +197,3 @@ for line in processed:
 
 part2 = len(rope.touched)
 print(part2)
-print(rope.touched)
-# 6405 too low
