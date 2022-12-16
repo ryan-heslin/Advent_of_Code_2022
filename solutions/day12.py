@@ -88,7 +88,7 @@ part1 = len(path) - 1
 print(part1)
 
 min_elevation = min(v.elevation for v in graph.values())
-starts = deque(
+starts = set(
     sorted(
         [k for k, v in graph.items() if v.elevation == min_elevation],
         key=lambda v: l1(v, goal),
@@ -98,7 +98,7 @@ starts = deque(
 # Something something programmer time more valuable than execution time
 best = inf
 while starts:
-    current = starts.popleft()
+    current = starts.pop()
     dist, prev = dijkstra(graph, current, goal)
     if not (dist == {} or prev == {}):
         path = reconstruct_path(goal, prev)
@@ -113,5 +113,9 @@ while starts:
                     this_best = length - i - 1
 
             best = min(best, this_best)
+    else:
+        path = filter(lambda node: node.elevation == 0, reconstruct_path(goal, prev))
+        starts.difference_update(path)
+
 
 print(best)
