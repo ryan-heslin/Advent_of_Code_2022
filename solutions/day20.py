@@ -15,7 +15,7 @@ def mix(numbers):
     handled = set()
 
     # insert after index
-    print(numbers)
+    # print(numbers)
     while index < length:
         # print(numbers)
         # print(f"Current index {index}")
@@ -25,27 +25,32 @@ def mix(numbers):
                 numbers[index] += 1j
             else:
 
-                element = numbers.pop(index)
+                element = numbers[index]
                 # if element == -2:
                 #     breakpoint()
                 # element += 1j
-                # Inserts rihgt of positive index, left of negative
+                # Inserts right of positive index, left of negative
                 shift = index + element.real
-                target = int(negative_modulus_my_way_and_youll_like_it(shift, length))
+
+                target = negative_modulus_my_way_and_youll_like_it(shift, length)
+                # If going right, offset since insertion is left
+                adjustment = 1 if target > 0 else length
+                target += adjustment
+                target = int(target)
                 # Account for elements right of initial index, shifted
                 # left by pop at index
-                target += (
-                    target > 0 and (shift + index) > length and target <= index
-                ) or (target < 0 and (length + target) <= index)
-                # Wrap backward
+                # Insert left of 0 same as append
                 if target == 0:
                     numbers.append(element)
                     numbers[-1] += 1j
+                    numbers.pop(index)
                 else:
                     numbers.insert(target, element)
-                    numbers[target - (target < 0)] += 1j
+                    numbers[target] += 1j
+                    numbers.pop(index + 1 if target <= index else index)
         else:
             index += 1
+    assert all(x.imag == 1 for x in numbers)
     return numbers
 
 
@@ -56,12 +61,13 @@ def negative_modulus_my_way_and_youll_like_it(x, modulus):
 def decrypt(numbers):
     modulus = len(numbers)
     start = numbers.index(0)
+    # print([numbers[(start + x) % modulus].real for x in range(1000, 4000, 1000)])
     return sum(numbers[(start + x) % modulus].real for x in range(1000, 4000, 1000))
 
 
-# raw_input = split_lines("inputs/day20.txt")
-# numbers = [complex(int(num), 0) for num in raw_input]
-numbers = [1, 2, -3, 3, -2, 0, 4]
+raw_input = split_lines("inputs/day20.txt")
+numbers = [complex(int(num), 0) for num in raw_input]
+# numbers = [1, 2, -3, 3, -2, 0, 4]
 original = set(numbers)
 
 mixed = mix(numbers)

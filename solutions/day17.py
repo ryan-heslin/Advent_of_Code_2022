@@ -53,8 +53,9 @@ board = dict(
 )
 highest = 0
 iterations = 2022
-
-for _, piece in zip(range(iterations), pieces):
+tortoise = 1
+hare = 2
+for i, piece in zip(range(iterations), pieces):
     # breakpoint()
     # TODO do this more efficiently
     # TODO cycle detection for part 2
