@@ -1,12 +1,26 @@
 from itertools import cycle
 from math import ceil
-from time import sleep
 
-# Draw piece 3 spaces above highest
-# Check spaces below
-# If any full, stop, record piece height + bottom y-val as new floor
-# Else reduce all y-coords 1
-#  Start with floor spaces
+
+def find_cycle(states):
+    for iteration, state in states.items():
+        for second in range(iteration + 1, iterations):
+            if (
+                states[second]["piece_i"] == state["piece_i"]
+                and states[second]["instruction_i"] == state["instruction_i"]
+            ):
+                period = second - iteration
+                difference = states[second]["height"] - state["height"]
+                for third in range(second + 1, iterations):
+                    # Found a cycle
+                    if (
+                        states[third]["piece_i"] == state["piece_i"]
+                        and states[third]["instruction_i"] == state["instruction_i"]
+                        and third - second == period
+                        and states[third]["height"] - states[second]["height"]
+                        == difference
+                    ):
+                        return iteration, period
 
 
 def print_board(board, upper):
@@ -29,7 +43,6 @@ class Piece:
 with open("inputs/day17.txt") as f:
     raw_input = f.read().rstrip("\n")
 
-raw_input = ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>"
 # True x coord, y indexed relative to bottom
 # Minus, plus, backward l, I, block
 coords = [
@@ -58,17 +71,22 @@ board = dict(
 )
 start = 4
 iterations = 2022
-tortoise = 1
-hare = 2
 iter = 0
 
-heights = {}
 cycle_found = False
-updates = []
-while not cycle_found or iter < 2022:
+states = {}
+n_pieces = len(coords)
+n_instructions = len(raw_input)
+target_iterations = 2022
+iterations = max(n_pieces * n_instructions, target_iterations)
+piece_i = instruction_i = -1
+
+while iter < iterations:
     # start = max(x.imag for x in board.keys()) + 4
     # start = highest + 4
     piece = next(pieces)
+    piece_i += 1
+    piece_i %= n_pieces
     current_piece = piece.draw_with_offset(start)
     # Inclusive of topmost part of piece
     this_size = piece.size
@@ -79,6 +97,9 @@ while not cycle_found or iter < 2022:
         # sleep(1)
         side_coords = [None] * this_size
         moved_side = False
+        instruction_i += 1
+        instruction_i %= n_instructions
+
         for i in range(this_size):
             this_coord = current_piece[i] + move
             if (not xmin <= this_coord.real <= xmax) or board.get(this_coord, False):
@@ -89,7 +110,7 @@ while not cycle_found or iter < 2022:
             moved_side = True
 
         if moved_side:
-            current_piece = side_coords.copy()
+            current_piece = side_coords
 
         down_coords = [None] * this_size
         moved_down = False
@@ -106,76 +127,35 @@ while not cycle_found or iter < 2022:
 
         if not moved_down:
             break
-        current_piece = down_coords.copy()
+        current_piece = down_coords
 
     for coord in current_piece:
         # assert coord not in board.keys()
         start = max(start, coord.imag + 4)
         board[coord] = 1
+    states[iter] = {
+        "height": start - 4,
+        "piece_i": piece_i,
+        "instruction_i": instruction_i,
+    }
 
-    if not cycle_found:
-        lowest = min(coord.imag for coord in current_piece)
-        # Cache this piece configuration
-        updates.append(
-            tuple(complex(coord.real, coord.imag - lowest) for coord in current_piece)
-        )
-        heights[iter] = start - 4
-        if len(set(updates)) < len(updates):
-            cycle_ends = [i for i, el in enumerate(updates) if el == updates[-1]]
-            # TODO actually detect cycle by checking for patterns that repeat the same block multiple times
-            if (
-                len(cycle_ends) > 2
-                and heights[cycle_ends]
-                and updates[
-                    cycle_ends[0] : (cycle_ends[1] + 1)
-                    == updates[cycle_ends[1] : (cycle_ends[2] + 1)]
-                ]
-            ):
-                cycle_length = cycle_ends[1] - cycle_ends[0]
-                cycle_height = heights[cycle_ends[1]] - heights[cycle_ends[0]]
-                cycle_found = True
-        # for i in range(iter // 2):
-        #     first = updates[i]
-        #     try:
-        #         recurrence = updates[(i + 1) :].index(first)
-        #         length = recurrence - first
-        #         if (iter - recurrence) >= length and updates[
-        #             first : (recurrence + 1)
-        #         ] == updates[recurrence : (recurrence + length + 1)]:
-        #             cycle_length = length
-        #             cycle_height = heights[recurrence] - heights[i]
-        #             cycle_found = True
-        #
-        #     except:
-        #         pass
-    if iter == 2021:
-        part1 = int(max(x.imag for x in board.keys()))
     iter += 1
-# Period of 53
-# heights[iter] = start - 4  # Inclusive of top
-# if iter % 2 == 0:
-#     candidate = iter // 2
-#     split_height = heights[candidate]
-#     lower = set()
-#     upper = set()
-#
-#     for coord in board.keys():
-#         if 0 < coord.imag <= split_height:
-#             lower.add(coord)
-#         else:
-#             upper.add(complex(coord.real, coord.imag - split_height))
-#
-#     if upper == lower:
-#         cycle_found = True
-#         period = candidate
-#         cycle_height = heights[candidate]
 
 
-# part1 = int(max(x.imag for x in board.keys()))
+# Too lazy to look up Floyd's
+part1 = int(states[target_iterations - 1]["height"])
 print(part1)
 
-target = 1000000000
+cycle_start, period = find_cycle(states)
+cycle_height = states[cycle_start + period]["height"] - states[cycle_start]["height"]
+bottom = states[cycle_start - 1]["height"]
+target = 1000000000000 - cycle_start
+
+# Since cycle doesn't start on bottom
 complete_cycles = target // period
 leftover = target % period
-part2 = cycle_height * complete_cycles + heights[leftover]
+leftover_height = (
+    states[cycle_start + leftover]["height"] - states[cycle_start]["height"]
+)
+part2 = int(cycle_height * complete_cycles + leftover_height + bottom + 1)
 print(part2)
