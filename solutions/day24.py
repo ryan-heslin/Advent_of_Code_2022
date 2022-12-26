@@ -1,13 +1,8 @@
 from collections import defaultdict
 from collections import deque
-from collections import namedtuple
-from math import copysign
 from math import inf
-from time import sleep
 
 from utils import split_lines
-
-# NOTE: may want to use right-hand coordinates (x increases, y increases) to consistently handle blizzardd direction
 
 
 def parse(lines):
@@ -138,7 +133,6 @@ def search(graph, start, goal, height, width):
 
 
 raw_input = split_lines("inputs/day24.txt")
-# raw_input = ["#.######", "#>>.<^<#", "#.<..<<#", "#>v.><>#", "#<^v^^>#", "######.#"]
 graph, width, height, start, end = parse(raw_input)
 assert start == -1j
 part1, end_state = search(graph.copy(), start, end, height, width)
@@ -150,7 +144,3 @@ print(f"First trip: {part1}")
 print(f"Return trip: {stage2}")
 print(f"Final trip: {stage3}")
 print(f"Total: {part2}")
-# 155 too low
-
-# Move before check
-# If old position has blizzard, must move; otherwise, can wait
