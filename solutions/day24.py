@@ -3,6 +3,7 @@ from collections import deque
 from collections import namedtuple
 from math import copysign
 from math import inf
+from time import sleep
 
 from utils import split_lines
 
@@ -71,12 +72,13 @@ def search(graph, start, goal, height, width):
     # state index, coord
     start = (0, start)
     Q = deque([start])
+    # if start != (0, 0 - 1j):
+    #     breakpoint()
 
     while Q:
         current = Q.popleft()
         index, coord = current
-        print(coord)
-        visited.add(current)
+        visited.add((index, coord))
         this_iter = index + 1
 
         if coord == goal:
@@ -90,12 +92,9 @@ def search(graph, start, goal, height, width):
                 next_state = states.get(
                     this_iter, advance_state(states[index], height, width)
                 )
-                states[index] = next_state
+                states[this_iter] = next_state
                 neighbors = deque([])
 
-                # Okay to wait
-                if next_state[coord] < 1 and (new := (this_iter, coord)) not in visited:
-                    neighbors.append(new)
                 # Left, up, right, down
                 if (
                     (coord.real > xmin and coord.imag <= ymax)
@@ -124,22 +123,33 @@ def search(graph, start, goal, height, width):
                 ):
                     neighbors.append(new)
                 # In reverse order, so last added go first
-                # if top_target:
-                #     neighbors.reverse()
+                # Okay to wait
+                if next_state[coord] < 1 and (new := (this_iter, coord)) not in visited:
+                    neighbors.appendleft(new)
+                neighbors = sorted(
+                    neighbors,
+                    key=lambda k: -(
+                        abs(k[1].real - goal.real) + abs(k[1].imag - goal.imag)
+                    ),
+                )
                 Q.extendleft(neighbors)
 
-    return best, states[int(best)]
+    return best, states[int(best)].copy()
 
 
 raw_input = split_lines("inputs/day24.txt")
+# raw_input = ["#.######", "#>>.<^<#", "#.<..<<#", "#>v.><>#", "#<^v^^>#", "######.#"]
 graph, width, height, start, end = parse(raw_input)
 assert start == -1j
-part1, end_state = search(graph, start, end, height, width)
+part1, end_state = search(graph.copy(), start, end, height, width)
 print(part1)
 stage2, end_state = search(end_state, end, start, height, width)
 stage3, _ = search(end_state, start, end, height, width)
 part2 = part1 + stage2 + stage3
-print(part2)
+print(f"First trip: {part1}")
+print(f"Return trip: {stage2}")
+print(f"Final trip: {stage3}")
+print(f"Total: {part2}")
 # 155 too low
 
 # Move before check
