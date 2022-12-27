@@ -1,87 +1,84 @@
+from collections import defaultdict
+
 from utils import split_lines
-
-
-def sign(x):
-    return 0 if x == 0 else x // abs(x)
-
-
-def negative_floor_div(x, divisor):
-    return sign(x) * abs(x) // divisor
 
 
 def mix(numbers):
     index = 0
     length = len(numbers)
-    modulus = len(numbers) - 1
+    modulus = length - 1
 
-    # insert after index
-    # print(numbers)
-    # breakpoint()
     while index < length:
-        # print(numbers)
-        # print(f"Current index {index}")
-        # print("\n")
         if numbers[index].imag == 0:
-            if numbers[index].real == 0:
-                numbers[index] += 1j
+
+            element = numbers.pop(index)
+            element += 1j
+            # Inserts right of positive index, left of negative
+            shift = index + element.real
+
+            target = int(shift % modulus)
+            if target == 0 and element.real < 0:
+                numbers.append(element)
             else:
-
-                element = numbers.pop(index)
-                # if element == -2:
-                #     breakpoint()
-                element += 1j
-                # Inserts right of positive index, left of negative
-                shift = index + element.real
-
-                target = int(shift % modulus)
-                # If going right, offset since insertion is left
-                # target += element.real > 0
-                # Account for elements right of initial index, shifted
-                # left by pop at index
-                # Insert left of 0 same as append
-                if target == 0 and element.real < 0:
-                    numbers.append(element)
-                else:
-                    numbers.insert(target, element)
-                # if element.real < 0 and target == 0:
-                #     numbers.append(element)
-                #     numbers.pop(index)
-                # else:
-                #     numbers.insert(target, element)
-                #     # This is not bugged
-                #     numbers.pop(index + (target <= index))
-                # print(numbers)
-                # print("\n")
+                numbers.insert(target, element)
         else:
             index += 1
-        # if index == 611:
-        #     breakpoint()
     assert all(x.imag == 1 for x in numbers)
     return numbers
 
 
-def negative_modulus_my_way_and_youll_like_it(x, modulus):
-    return sign(x) * (abs(x) % modulus)
+def mix_ordered(numbers, order):
+    length = len(numbers)
+    modulus = length - 1
+
+    for num in order:
+
+        index = numbers.index(num)
+        element = numbers.pop(index)
+        # Inserts right of positive index, left of negative
+        shift = index + element.real
+
+        target = int(shift % modulus)
+        # Insert left of 0 same as append
+        if target == 0 and element.real < 0:
+            numbers.append(element)
+        else:
+            numbers.insert(target, element)
+    return numbers
 
 
 def decrypt(numbers):
     modulus = len(numbers)
     start = numbers.index(0)
-    print([numbers[(start + x) % modulus].real for x in range(1000, 4000, 1000)])
     return sum(numbers[(start + x) % modulus].real for x in range(1000, 4000, 1000))
 
 
 raw_input = split_lines("inputs/day20.txt")
 numbers = [complex(int(num), 0) for num in raw_input]
-# numbers = [1, 2, -3, 3, -2, 0, 4]
-original = set(numbers)
 
-mixed = mix(numbers)
+mixed = mix(numbers.copy())
 mixed = [int(x.real) for x in mixed]
-assert set(num.real for num in mixed) == original
 part1 = int(decrypt(mixed))
 print(part1)
 
 
 key = 811589153
-numbers = [complex(int(num) * key, 0) for num in raw_input]
+new_numbers = [(x * key) + 0j for x in numbers]
+counts = defaultdict(lambda: 0)
+initial = [None] * len(numbers)
+for i, num in enumerate(new_numbers):
+    counts[num] += 1
+    initial[i] = complex(num, counts[num])
+
+new_numbers = initial.copy()
+order = initial.copy()
+for _ in range(10):
+    new_numbers = mix_ordered(new_numbers, order)
+    # new_numbers = [x - 1j for x in new_numbers]
+
+result = [int(x.real) for x in new_numbers]
+part2 = int(decrypt(result))
+print(part2)
+
+# 1834191485780 too low
+# 7503141719485 too high
