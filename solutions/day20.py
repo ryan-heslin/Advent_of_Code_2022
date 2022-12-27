@@ -12,6 +12,7 @@ def negative_floor_div(x, divisor):
 def mix(numbers):
     index = 0
     length = len(numbers)
+    modulus = len(numbers) - 1
 
     # insert after index
     # print(numbers)
@@ -25,33 +26,36 @@ def mix(numbers):
                 numbers[index] += 1j
             else:
 
-                element = numbers[index]
+                element = numbers.pop(index)
                 # if element == -2:
                 #     breakpoint()
                 element += 1j
                 # Inserts right of positive index, left of negative
                 shift = index + element.real
 
-                target = int(shift % length)
+                target = int(shift % modulus)
                 # If going right, offset since insertion is left
-                target += element.real > 0
+                # target += element.real > 0
                 # Account for elements right of initial index, shifted
                 # left by pop at index
                 # Insert left of 0 same as append
-                if element.real < 0 and target == 0:
+                if target == 0 and element.real < 0:
                     numbers.append(element)
-                    numbers.pop(index)
                 else:
                     numbers.insert(target, element)
-                    # This is not bugged
-                    numbers.pop(index + (target <= index))
+                # if element.real < 0 and target == 0:
+                #     numbers.append(element)
+                #     numbers.pop(index)
+                # else:
+                #     numbers.insert(target, element)
+                #     # This is not bugged
+                #     numbers.pop(index + (target <= index))
+                # print(numbers)
+                # print("\n")
         else:
             index += 1
-        # print(numbers)
-        # print("\n")
         # if index == 611:
         #     breakpoint()
-        print(index)
     assert all(x.imag == 1 for x in numbers)
     return numbers
 
@@ -77,3 +81,7 @@ mixed = [int(x.real) for x in mixed]
 assert set(num.real for num in mixed) == original
 part1 = int(decrypt(mixed))
 print(part1)
+
+
+key = 811589153
+numbers = [complex(int(num) * key, 0) for num in raw_input]
