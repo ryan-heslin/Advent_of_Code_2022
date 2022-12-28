@@ -55,7 +55,7 @@ def find_neighbors(state):
     return result
 
 
-def floyd_johnson(map):
+def floyd_warshall(map):
     pairs = defaultdict(lambda: inf)
     # Direct connections
     for node in map.keys():
@@ -67,8 +67,10 @@ def floyd_johnson(map):
     for i in all:
         for j in all:
             for k in all:
-                if pairs[(i, j)] > pairs[(i, k)] + pairs[(k, j)]:
-                    pairs[(i, j)] = pairs[(i, k)] + pairs[(k, j)]
+                if pairs[(j, k)] > (candidate := pairs[(j, i)] + pairs[(i, k)]):
+                    pairs[(j, k)] = candidate
+                if pairs[(k, j)] > (candidate := pairs[(i, j)] + pairs[(k, i)]):
+                    pairs[(k, j)] = candidate
     return pairs
 
 
@@ -79,15 +81,17 @@ def explore(start, graph, pressures):
     best_pressure = -inf
     Q = deque([current])
     targets = pressures.keys()
+    bests = {}
 
     while Q:
         v = Q.popleft()
         hash = ",".join(
             (v["node"], str(v["time"]), str(v["pressure"]), str(sorted(v["done"])))
         )
+        # bests[tuple(v["visited"])]
 
-        if hash in visited:
-            continue
+        # if hash in visited:
+        #     continue
         visited.add(hash)
 
         # Activate valve
@@ -100,8 +104,12 @@ def explore(start, graph, pressures):
                     "done": v["done"] | {v["node"]},
                 }
             )
-        if v["done"] == targets or graph[v["node"]] == {} or v["time"] == 0:
+        if (graph[v["node"]] == {} and v["node"] in v["done"]) or v["time"] == 0:
             best_pressure = max(v["pressure"], best_pressure)
+            # if best_pressure == 1739:
+            #     breakpoint()
+            #     print(best_pressure)
+            #     print(v["done"])
             continue
 
         neighbors = graph[v["node"]]
@@ -197,7 +205,7 @@ def explore(start, graph, pressures):
 
 targets = {node for node, v in map.items() if v["pressure"] > 0}
 # targets.add(start)
-pairs = floyd_johnson(map)
+pairs = floyd_warshall(map)
 pairs = {
     source: dest
     for source, dest in pairs.items()
@@ -210,12 +218,15 @@ graph = {}
 for el in pairs.items():
 
     source = el[0][0]
+    cost = el[1]
     if source not in graph.keys():
-        graph[source] = {el[0][1]: el[1]}
+        graph[source] = {el[0][1]: cost}
     else:
-        graph[source][el[0][1]] = el[1]
+        graph[source][el[0][1]] = cost
 
 pressures = {k: map[k]["pressure"] for k in targets}
+
+# Only paths to pressure nodes
 graph_reduced = {
     source: {
         dest: cost
@@ -227,4 +238,18 @@ graph_reduced = {
 
 part1 = explore(start, graph_reduced, pressures)
 print(part1)
+
+
+def dijkstra(start, graph, pressures):
+    dist = defaultdict(lambda: inf)
+    prev = defaultdict(lambda: None)
+
+    start = {tuple(start)}
+    dist[tuple(start)] = 0
+
+    Q = deque(start)
+    while Q:
+        current = Q.popleft()
+
+
 # TODO: Discord hint: " such that it is a Dijkstra where instead of hashing all that you hash into a set of visited nodes, you instead use a dict which simply maps the current valve and set of opened valves to the current highest pressure and only rerun a node if the cached highest pressure is lower than the current highest pressure and that this could be further reduced if you remove nodes with 0 flow rate and build up a weighted graph Not sure about implementation bugs atm"
