@@ -1,17 +1,6 @@
 from collections import defaultdict
 from collections import deque
-from itertools import permutations
 from math import inf
-
-from utils import split_lines
-
-
-def compute_pressure(graph, nodes, start):
-    time = 30
-    pressure = 0
-    prev = start
-    for node in nodes:
-
 
 
 def parse(line):
@@ -24,43 +13,12 @@ def parse(line):
     return name, {"pressure": flow, "neighbors": neighbors}
 
 
-raw_input = split_lines("inputs/day16.txt")
+with open("inputs/day16.txt") as f:
+    raw_input = f.read().splitlines()
 map = dict(parse(line) for line in raw_input)
 start = "AA"
 
 # Node: time, activated, unactivated, pressure
-
-
-def find_neighbors(state):
-    result = []
-    if state["time"] == 0 or not state["unactivated"]:
-        return result
-    time = state["time"] - 1
-    current = state["node"]
-    # Activate current node
-    if (
-        state["node"] not in state["unactivated"]
-        and map[state["node"]]["pressure"] != 0
-    ):
-        result.append(
-            {
-                "node": current,
-                "time": time,
-                "pressure": state["pressure"] + map[current]["pressure"] * (time - 1),
-                "unactivated": state["unactivated"] - {current},
-            }
-        )
-    # Move to other node
-    result += [
-        {
-            "node": neighbor,
-            "time": time,
-            "pressure": state["pressure"],
-            "unactivated": state["unactivated"].copy(),
-        }
-        for neighbor in map[current]["neighbors"]
-    ]
-    return result
 
 
 def floyd_warshall(map):
@@ -82,27 +40,21 @@ def floyd_warshall(map):
     return pairs
 
 
-def explore(start, graph, pressures):
+def explore(start, graph, pressures, start_time=30):
 
-    current = {"node": start, "time": 30, "pressure": 0, "done": set()}
-    visited = set()
-    best_pressure = -inf
+    current = {"node": start, "time": start_time, "pressure": 0, "done": set()}
+    # Remove nodes already visited
+
     Q = deque([current])
     targets = pressures.keys()
     bests = defaultdict(lambda: -inf)
 
     while Q:
         v = Q.popleft()
-        # hash = ",".join(
-        #     (v["node"], str(v["time"]), str(v["pressure"]), str(sorted(v["done"])))
-        # )
-        if bests[(tuple(v["done"]), v["node"], v["time"])] >= v["pressure"]:
+        current_key = (tuple(v["done"]), v["node"], v["time"])
+        if bests[current_key] >= v["pressure"]:
             continue
-        bests[(tuple(v["done"]), v["node"], v["time"])] = v["pressure"]
-
-        # if hash in visited:
-        #     continue
-        # visited.add(hash)
+        bests[current_key] = v["pressure"]
 
         # Activate valve
         if v["node"] in targets and v["node"] not in v["done"] and v["time"] > 0:
@@ -114,12 +66,11 @@ def explore(start, graph, pressures):
                     "done": v["done"] | {v["node"]},
                 }
             )
-        if (graph[v["node"]] == {} and v["node"] in v["done"]) or v["time"] == 0:
-            # best_pressure = max(v["pressure"], best_pressure)
-            # if best_pressure == 1739:
-            #     breakpoint()
-            #     print(best_pressure)
-            #     print(v["done"])
+        if (
+            (v["node"] != start and v["node"] not in v["done"])
+            or (graph[v["node"]] == {} and v["node"] in v["done"])
+            or v["time"] == 0
+        ):
             continue
 
         neighbors = graph[v["node"]]
@@ -140,81 +91,7 @@ def explore(start, graph, pressures):
     return bests
 
 
-# def brute_force(start, graph):
-#     best_pressure = -inf
-#     targets = (k for k in graph.keys() if k != start)
-#     possibilities = permutations(targets)
-#
-#     # breakpoint()
-#     greatest = max(pressures.values())
-#     i = 0
-#     dead_ends = {k for k, v in graph.items() if v == {}}
-#     max_end = len(tuple(targets)) - len(dead_ends)
-#
-#     # starts = ((k, v) for k, v in pairs.items() if k[0] == start)
-#
-#     for perm in possibilities:
-#         # invalid = False
-#         # for node in dead_ends:
-#         #     if perm.index(node) != tail:
-#         #         invalid = True
-#         # if invalid:
-#         #     break
-#         for node
-#         prev = perm[0]
-#         # if sum(graph[start][prev] l + )
-#         if prev not in graph[start].keys():
-#             continue
-#         time = 30 - graph[start][prev] - 1
-#         this_pressure = pressures[prev] * time
-#
-#         for node in perm[1:]:
-#             if graph[prev] == {}:
-#                 break
-#             time -= graph[prev][node] + 1
-#             if time <= 0 or this_pressure + time * greatest <= best_pressure:
-#                 break
-#             this_pressure += pressures[node] * time
-#             prev = node
-#         else:
-#             best_pressure = max(this_pressure, best_pressure)
-#     return best_pressure
-#
-#
-# def dijkstra(start):
-#
-#
-
-#
-#     dist = defaultdict(lambda: -inf)
-#     prev = {}
-#     prev[start] = None
-#     dist[start] = 0
-#     Q = deque(start)
-#
-#     while Q:
-#         # print(len(Q))
-#         u = max(Q, key=lambda state: state["pressure"])
-#         Q.remove(u)
-#         new_neighbors = find_neighbors(u)
-#         for neighbor in new_neighbors:
-#             this_hash = hash(neighbor.values())
-#             dist[this_hash] = max(dist[this_hash], neighbor["pressure"])
-#             if neighbor["time"] != 0 and neighbor["unactivated"]:
-#                 Q.appendleft(neighbor)
-#     return max(dist.values())
-#     # alt = dist[this_hash] + neighbor["pressure"]
-#     # if alt > dist:
-#     #     dist[this_hash] = alt
-#     #
-#
-#
-# part1 = dijkstra(start)
-# print(part1)
-
-
 targets = {node for node, v in map.items() if v["pressure"] > 0}
-# targets.add(start)
 pairs = floyd_warshall(map)
 pairs = {
     source: dest
@@ -250,17 +127,27 @@ results = explore(start, graph_reduced, pressures)
 part1 = max(results.values())
 print(part1)
 
+new_time = 26
+starts = explore(start, graph_reduced, pressures, new_time)
+part2 = -inf
+starts = {k: starts[k] for k in sorted(starts.keys(), key=lambda x: -starts[x])}
+greatest = max(starts.values())
 
-def dijkstra(start, graph, pressures):
-    dist = defaultdict(lambda: inf)
-    prev = defaultdict(lambda: None)
+for nodes, pressure in starts.items():
+    # Skip if less even after adding best possible 26-minute pressure
+    if pressure + greatest > part2:
+        exclusions = set(nodes[0] + (nodes[1],))
+        exclusions.discard(start)
+        this_graph = {
+            source: {
+                dest: cost for dest, cost in edge.items() if dest not in exclusions
+            }
+            for source, edge in graph_reduced.items()
+            if source == start or source not in exclusions
+        }
 
-    start = {tuple(start)}
-    dist[tuple(start)] = 0
+        results = explore(start, this_graph, pressures, start_time=new_time)
+        this_pressure = max(results.values())
+        part2 = max(this_pressure + pressure, part2)
 
-    Q = deque(start)
-    while Q:
-        current = Q.popleft()
-
-
-# TODO: Discord hint: " such that it is a Dijkstra where instead of hashing all that you hash into a set of visited nodes, you instead use a dict which simply maps the current valve and set of opened valves to the current highest pressure and only rerun a node if the cached highest pressure is lower than the current highest pressure and that this could be further reduced if you remove nodes with 0 flow rate and build up a weighted graph Not sure about implementation bugs atm"
+print(part2)
