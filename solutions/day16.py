@@ -6,6 +6,14 @@ from math import inf
 from utils import split_lines
 
 
+def compute_pressure(graph, nodes, start):
+    time = 30
+    pressure = 0
+    prev = start
+    for node in nodes:
+
+
+
 def parse(line):
     pressure, neighbors = line.split("; ")
     parts = pressure.split(" ")
@@ -81,18 +89,20 @@ def explore(start, graph, pressures):
     best_pressure = -inf
     Q = deque([current])
     targets = pressures.keys()
-    bests = {}
+    bests = defaultdict(lambda: -inf)
 
     while Q:
         v = Q.popleft()
-        hash = ",".join(
-            (v["node"], str(v["time"]), str(v["pressure"]), str(sorted(v["done"])))
-        )
-        # bests[tuple(v["visited"])]
+        # hash = ",".join(
+        #     (v["node"], str(v["time"]), str(v["pressure"]), str(sorted(v["done"])))
+        # )
+        if bests[(tuple(v["done"]), v["node"], v["time"])] >= v["pressure"]:
+            continue
+        bests[(tuple(v["done"]), v["node"], v["time"])] = v["pressure"]
 
         # if hash in visited:
         #     continue
-        visited.add(hash)
+        # visited.add(hash)
 
         # Activate valve
         if v["node"] in targets and v["node"] not in v["done"] and v["time"] > 0:
@@ -105,7 +115,7 @@ def explore(start, graph, pressures):
                 }
             )
         if (graph[v["node"]] == {} and v["node"] in v["done"]) or v["time"] == 0:
-            best_pressure = max(v["pressure"], best_pressure)
+            # best_pressure = max(v["pressure"], best_pressure)
             # if best_pressure == 1739:
             #     breakpoint()
             #     print(best_pressure)
@@ -127,7 +137,7 @@ def explore(start, graph, pressures):
                     }
                 )
 
-    return best_pressure
+    return bests
 
 
 # def brute_force(start, graph):
@@ -236,7 +246,8 @@ graph_reduced = {
     for source, edges in graph.items()
 }
 
-part1 = explore(start, graph_reduced, pressures)
+results = explore(start, graph_reduced, pressures)
+part1 = max(results.values())
 print(part1)
 
 
