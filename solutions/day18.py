@@ -1,6 +1,6 @@
 from collections import deque
 
-from utils import split_lines
+from utils.utils import split_lines
 
 raw_input = split_lines("inputs/day18.txt")
 

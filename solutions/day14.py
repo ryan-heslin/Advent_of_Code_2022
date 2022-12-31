@@ -1,9 +1,7 @@
 from collections import defaultdict
-from copy import deepcopy
 from functools import reduce
-from math import inf
 
-from utils import split_lines
+from utils.utils import split_lines
 
 rock = "#"
 sand = "o"
@@ -138,13 +136,3 @@ print(part1)
 cave2 = BoundedCave(map, (500, 0))
 part2 = cave2.simulate()
 print(part2)
-
-
-# Parse:
-# For each line:
-# For each segment:
-# Consume endpoint
-# Mark beginning point
-# Identify common dimension
-# Mark all points in range of different dimension along common, excluding end
-# Fall

@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from utils import split_lines
+from utils.utils import split_lines
 
 
 def mix(numbers):

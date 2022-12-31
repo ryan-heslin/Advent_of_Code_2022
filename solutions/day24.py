@@ -2,7 +2,7 @@ from collections import defaultdict
 from collections import deque
 from math import inf
 
-from utils import split_lines
+from utils.utils import split_lines
 
 
 def parse(lines):
@@ -59,16 +59,12 @@ def search(graph, start, goal, height, width):
     xmin = ymin = 0
     xmax = width - 1
     ymax = height - 1
-    top_target = goal.real == -1
-    period = width * height
     best = inf
     visited = set()
 
     # state index, coord
     start = (0, start)
     Q = deque([start])
-    # if start != (0, 0 - 1j):
-    #     breakpoint()
 
     while Q:
         current = Q.popleft()
@@ -83,7 +79,6 @@ def search(graph, start, goal, height, width):
             if index < best and abs(coord.real - goal.real) + abs(
                 coord.imag - goal.imag
             ) < (best - index):
-                # reduced_index = this_iter % period
                 next_state = states.get(
                     this_iter, advance_state(states[index], height, width)
                 )
@@ -135,11 +130,14 @@ def search(graph, start, goal, height, width):
 raw_input = split_lines("inputs/day24.txt")
 graph, width, height, start, end = parse(raw_input)
 assert start == -1j
+
 part1, end_state = search(graph.copy(), start, end, height, width)
 print(part1)
+
 stage2, end_state = search(end_state, end, start, height, width)
 stage3, _ = search(end_state, start, end, height, width)
 part2 = part1 + stage2 + stage3
+
 print(f"First trip: {part1}")
 print(f"Return trip: {stage2}")
 print(f"Final trip: {stage3}")

@@ -3,7 +3,7 @@ from collections import deque
 from functools import cache
 from math import inf
 
-from utils import split_lines
+from utils.utils import split_lines
 
 
 def print_graph(graph):
@@ -49,11 +49,9 @@ def simulate(board, iterations, until_stable=False):
     )
 
     i = 1
-    new = board.copy()
     while i <= iterations:
         propositions = defaultdict(lambda: [])
         changed = 0
-        previous = new.copy()
 
         for elf in board:
             elf_neighbors = neighbors(elf)
@@ -79,7 +77,6 @@ def simulate(board, iterations, until_stable=False):
                 board.remove(elf[0])
                 changed += 1
 
-        new = board.copy()
         if until_stable and changed == 0:
             return i
         directions.rotate(-1)

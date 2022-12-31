@@ -2,7 +2,7 @@ from collections import deque
 from math import ceil
 from math import inf
 
-from utils import split_lines
+from utils.utils import split_lines
 
 # Can I do it without re?
 def parse_line(line):

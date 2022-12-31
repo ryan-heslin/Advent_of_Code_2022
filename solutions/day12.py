@@ -1,10 +1,9 @@
 from collections import deque
-from functools import cache
 from itertools import repeat
 from math import inf
 
-from utils import l1
-from utils import split_lines
+from utils.utils import l1
+from utils.utils import split_lines
 
 ascii_a = 97
 raw_input = split_lines("inputs/day12.txt")

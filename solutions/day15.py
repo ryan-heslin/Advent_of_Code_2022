@@ -1,8 +1,8 @@
 import re
 from math import inf
 
-from utils import l1
-from utils import split_lines
+from utils.utils import l1
+from utils.utils import split_lines
 
 
 def parse_line(line):
