@@ -80,11 +80,11 @@ for i, line in enumerate(raw_input):
             goal = coord
         graph[coord] = Node(coord, elevation(letter), graph)
 
-dist, prev = dijkstra(graph, start, goal)
+dist, _ = dijkstra(graph, start, goal)
 
-path = reconstruct_path(goal, prev)
-part1 = len(path) - 1
+part1 = dist[goal]
 print(part1)
+
 
 min_elevation = min(v.elevation for v in graph.values())
 starts = set(
@@ -103,7 +103,7 @@ while starts:
         path = reconstruct_path(goal, prev)
         path.popleft()
         if path:
-            this_best = length = len(path)
+            this_best = length = dist[goal]
 
             # Subtract path length from any other valid start encountered on returned path
             for i, el in enumerate(path):
@@ -113,7 +113,9 @@ while starts:
 
             best = min(best, this_best)
     else:
-        path = filter(lambda node: node.elevation == 0, reconstruct_path(goal, prev))
+        path = filter(
+            lambda node: node.elevation == min_elevation, reconstruct_path(goal, prev)
+        )
         starts.difference_update(path)
 
 
