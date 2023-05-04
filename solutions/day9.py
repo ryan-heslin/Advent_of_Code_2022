@@ -84,7 +84,6 @@ class State:
                         self.head[static_dimension] == self.tail[static_dimension]
                     ):  # Being dragged behind
 
-                        print("check")
                         self.tail[static_dimension] = self.head[static_dimension]
                         self.tail[dynamic_dimension] = (
                             self.head[dynamic_dimension] - sign

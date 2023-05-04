@@ -132,13 +132,12 @@ graph, width, height, start, end = parse(raw_input)
 assert start == -1j
 
 part1, end_state = search(graph.copy(), start, end, height, width)
-print(part1)
 
 stage2, end_state = search(end_state, end, start, height, width)
 stage3, _ = search(end_state, start, end, height, width)
 part2 = part1 + stage2 + stage3
 
-print(f"First trip: {part1}")
+print(f"First trip (part 1): {part1}")
 print(f"Return trip: {stage2}")
 print(f"Final trip: {stage3}")
-print(f"Total: {part2}")
+print(f"Total (part 2): {part2}")

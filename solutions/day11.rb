@@ -20,9 +20,7 @@ class Monkey
   end
 
   def operate()
-    #puts("Before " + @current_hazard.to_s)
     @current_hazard = (eval(@operation) / 3).floor()
-    #puts("After " + @current_hazard.to_s)
   end
 
   def give()
@@ -40,7 +38,6 @@ class Monkey
       @current_hazard = @items.shift()
       operate
       target = test ? 1 : 0
-      #puts("Giving to " + @targets[target].to_s)
       result.push([@targets[target], @current_hazard])
       #@current_hazard = nil
       result
@@ -49,9 +46,7 @@ class Monkey
   end
 end
 
-#file = File.new("inputs/day11.txt")
 raw_input = File.read("inputs/day11.txt")
-#file.close
 
 processed = raw_input.split(/\n\n/)
 #puts(processed.size)
@@ -64,7 +59,6 @@ n_monkeys = troop.size()
 for round in 1..20
   for monkey in 0..(n_monkeys - 1)
     result = troop[monkey].round()
-    #puts(result)
     if result.size > 0
       for i in 0..(result.size() - 1)
         troop[result[i][0]].receive(result[i][1])
@@ -114,7 +108,6 @@ class DividingMonkey < Monkey
             dividend
           end
         )
-      #puts("Giving to " + @targets[target].to_s)
       result.push([@targets[target], @current_hazard])
       #@current_hazard = nil
       result
@@ -152,9 +145,7 @@ class ItemMonkey < Monkey
     @inspections = 0
   end
   def operate()
-    #puts("Before " + @current_hazard.to_s)
     eval(@operation)
-    #puts("After " + @current_hazard.to_s)
   end
   def round()
     result = []
@@ -165,7 +156,6 @@ class ItemMonkey < Monkey
       operate
       target = test ? 1 : 0
       new_item.value = @current_hazard
-      #puts("Giving to " + @targets[target].to_s)
       result.push([@targets[target], new_item])
       #@current_hazard = nil
       result
@@ -197,36 +187,15 @@ end
 
 for round in 1..rounds
   for monkey in 0..(n_monkeys - 1)
-    #puts("Monkey " + monkey.to_s)
-    #puts("\n")
     result = new_troop[monkey].round()
-    #puts(result)
     if result.size > 0
       for i in 0..(result.size() - 1)
         new_troop[result[i][0]].receive(result[i][1])
       end
     end
   end
-  # Arrangement of items and numbers handled, respectively
-  # this_round_items = new_troop.map { |m| m.items.map { |item| item.id } }
-  # this_round_totals = new_troop.map { |m| m.inspections }
-  # break if arrangements.has_value?(this_round_items)
-  # arrangements[round] = this_round_items
-  # totals[round] = this_round_totals
 end
 
-# rounds_left = rounds - round
-# complete_rounds = (rounds / round).floor()
-# leftover = rounds % round
-#
-# total_inspections = this_round_totals.map { |x| x * complete_rounds }
-# last_cycle = totals[leftover]
-# total_inspections =
-#   total_inspections.zip(last_cycle).map { |pair| pair[0] + pair[1] }
-
-puts new_troop.map { |x| x.inspections }
-#puts total_inspections
 ranking = new_troop.map { |x| x.inspections }.sort { |a, b| b - a }
-#ranking = total_inspections.sort { |a, b| b - a }
 monkey_business = ranking[0] * ranking[1]
 puts(monkey_business)

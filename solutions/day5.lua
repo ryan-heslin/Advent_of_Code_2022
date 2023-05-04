@@ -87,11 +87,11 @@ stacks = form_stacks(stack_data)
 
 local code = {}
 for i, line in ipairs(instructions) do
-    code[i] = compile(instructions[i])
+    code[i] = compile(line)
 end
 
 for _, line in ipairs(code) do
-    move(unpack(line))
+    move(table.unpack(line))
 end
 
 local top = top_crates()
@@ -100,7 +100,7 @@ print(part1)
 
 stacks = form_stacks(stack_data)
 for _, line in ipairs(code) do
-    over_9000(unpack(line))
+    over_9000(table.unpack(line))
 end
 
 local top = top_crates()
