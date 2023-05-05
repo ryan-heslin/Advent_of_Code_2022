@@ -1,10 +1,10 @@
 from collections import defaultdict
-from collections import deque
 from math import inf
+from queue import PriorityQueue
 
 from utils.utils import split_lines
 
-ascii_a = 97
+ascii_a = ord("a")
 raw_input = split_lines("inputs/day12.txt")
 graph = {}
 
@@ -36,19 +36,23 @@ def elevation(letter):
 
 def dijkstra(G, start):
     coords = G.keys()
-    Q = deque(coords)
+    Q = PriorityQueue()
     dist = defaultdict(lambda: inf)
     dist[start] = 0
+    Q.put((0, start), block=False)
+    visited = set()
 
-    while Q:
-        u = min(Q, key=lambda coord: dist[coord])
-        Q.remove(u)
+    while Q.qsize():
+        current_dist, u = Q.get()
 
+        alt = current_dist + 1
         for v in graph[u].neighbors():
-            if v in Q:
-                alt = dist[u] + 1
+            if v in coords:
                 if alt < dist[v]:
                     dist[v] = alt
+                if v not in visited:
+                    Q.put((alt, v), block=False)
+                    visited.add(v)
 
     return dist
 
