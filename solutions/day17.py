@@ -1,5 +1,8 @@
 from itertools import cycle
 from math import ceil
+from operator import attrgetter
+
+imag = attrgetter("imag")
 
 
 def find_cycle(states):
@@ -32,7 +35,9 @@ class Piece:
     def __init__(self, coords) -> None:
         self.coords = coords
         self.height = (
-            max(x.imag for x in self.coords) - min(x.imag for x in self.coords) + 1
+            int(max(self.coords, key=imag).imag)
+            - int(max(self.coords, key=imag).imag)
+            + 1
         )
         self.size = len(coords)
 
@@ -71,19 +76,11 @@ pieces = """####
 ##"""
 
 # True x coord, y indexed relative to bottom
-# Minus, plus, backward l, I, block
-
-old_coords = [
-    (complex(-1, 0), complex(0, 0), complex(1, 0), complex(2, 0)),
-    (complex(0, 0), complex(-1, 1), complex(0, 1), complex(1, 1), complex(0, 2)),
-    (complex(-1, 0), complex(0, 0), complex(1, 0), complex(1, 1), complex(1, 2)),
-    (complex(-1, 0), complex(-1, 1), complex(-1, 2), complex(-1, 3)),
-    (complex(-1, 0), complex(0, 0), complex(-1, 1), complex(0, 1)),
-]
 coords = list(map(parse_piece, pieces.split("\n\n")))
 # Have to invert L for some reason
+height = int(max(coords[2], key=imag).imag)
 coords[2] = tuple(
-    complex(x.real, 0 if x.imag == 2 else 2 if x.imag == 0 else x.imag)
+    complex(x.real, 0 if x.imag == height else height if x.imag == 0 else x.imag)
     for x in coords[2]
 )
 
