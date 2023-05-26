@@ -56,8 +56,7 @@ def decrypt(numbers):
 raw_input = split_lines("inputs/day20.txt")
 numbers = [complex(int(num), 0) for num in raw_input]
 
-mixed = mix(numbers.copy())
-mixed = [int(x.real) for x in mixed]
+mixed = [int(x.real) for x in mix(numbers.copy())]
 part1 = int(decrypt(mixed))
 print(part1)
 
@@ -74,11 +73,7 @@ new_numbers = initial.copy()
 order = initial.copy()
 for _ in range(10):
     new_numbers = mix_ordered(new_numbers, order)
-    # new_numbers = [x - 1j for x in new_numbers]
 
 result = [int(x.real) for x in new_numbers]
 part2 = int(decrypt(result))
 print(part2)
-
-# 1834191485780 too low
-# 7503141719485 too high

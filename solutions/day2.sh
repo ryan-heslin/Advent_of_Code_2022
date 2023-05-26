@@ -9,9 +9,9 @@ part2=0
 
 score() {
     local diff="$1"
-    if [[ $diff -eq -2 || $diff -eq 1 ]]; then
+    if [[ "$diff" -eq -2 || "$diff" -eq 1 ]]; then
         result=0
-    elif [[ $diff -eq -1 || $diff -eq 2 ]]; then
+    elif [[ "$diff" -eq -1 || "$diff" -eq 2 ]]; then
         result=6
     else
         result=3
@@ -26,7 +26,6 @@ score() {
     player="$(("$player" - "$ASCII_X"))"
 
     diff=$(("$opponent" - "$player"))
-
     result=$(score "$diff")
 
     result=$(("$result" + "$player" + 1))

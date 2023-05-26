@@ -40,18 +40,53 @@ class Piece:
         return [coord + complex(0, offset) for coord in self.coords]
 
 
+def parse_piece(chars):
+    result = []
+    chars = chars.splitlines()
+    for j, line in enumerate(chars):
+        for i, char in enumerate(line):
+            if char == "#":
+                result.append(complex(i - 1, j))
+    return tuple(result)
+
+
 with open("inputs/day17.txt") as f:
     raw_input = f.read().rstrip("\n")
+pieces = """####
+
+.#.
+###
+.#.
+
+..#
+..#
+###
+
+#
+#
+#
+#
+
+##
+##"""
 
 # True x coord, y indexed relative to bottom
 # Minus, plus, backward l, I, block
-coords = [
+
+old_coords = [
     (complex(-1, 0), complex(0, 0), complex(1, 0), complex(2, 0)),
     (complex(0, 0), complex(-1, 1), complex(0, 1), complex(1, 1), complex(0, 2)),
     (complex(-1, 0), complex(0, 0), complex(1, 0), complex(1, 1), complex(1, 2)),
     (complex(-1, 0), complex(-1, 1), complex(-1, 2), complex(-1, 3)),
     (complex(-1, 0), complex(0, 0), complex(-1, 1), complex(0, 1)),
 ]
+coords = list(map(parse_piece, pieces.split("\n\n")))
+# Have to invert L for some reason
+coords[2] = tuple(
+    complex(x.real, 0 if x.imag == 2 else 2 if x.imag == 0 else x.imag)
+    for x in coords[2]
+)
+
 pieces = cycle([Piece(coord) for coord in coords])
 
 replacements = {
@@ -70,20 +105,17 @@ board = dict(
     )
 )
 start = 4
-iterations = 2022
 iter = 0
 
 cycle_found = False
 states = {}
 n_pieces = len(coords)
 n_instructions = len(raw_input)
-target_iterations = 2022
+target_iterations = iterations = 2022
 iterations = max(n_pieces * n_instructions, target_iterations)
 piece_i = instruction_i = -1
 
 while iter < iterations:
-    # start = max(x.imag for x in board.keys()) + 4
-    # start = highest + 4
     piece = next(pieces)
     piece_i += 1
     piece_i %= n_pieces
@@ -149,7 +181,8 @@ print(part1)
 cycle_start, period = find_cycle(states)
 cycle_height = states[cycle_start + period]["height"] - states[cycle_start]["height"]
 bottom = states[cycle_start - 1]["height"]
-target = 1000000000000 - cycle_start
+elephant_demand = 1000000000000
+target = elephant_demand - cycle_start
 
 # Since cycle doesn't start on bottom
 complete_cycles = target // period

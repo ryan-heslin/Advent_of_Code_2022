@@ -42,7 +42,6 @@ def find_intervals(sensors, y):
 def check_intervals(intervals, xmin, xmax):
     intervals = sorted(set(intervals))
 
-    # TODO Optimization: find max overlap of any two intervals, return it, skip that many rows
     candidate = xmin
     while intervals and candidate <= xmax:
         current = intervals.pop(0)
@@ -60,7 +59,6 @@ def frequency(coord):
 
 
 class Sensor:
-
     # Diamond of equal Manhattan distance centered on center
     def __init__(self, center, beacon) -> None:
         self.center = center
@@ -77,7 +75,7 @@ class Sensor:
 
 
 raw_input = split_lines("inputs/day15.txt")
-sensors = [parse_line(line) for line in raw_input]
+sensors = tuple(map(parse_line, raw_input))
 y = 2000000
 part1_intervals = find_intervals(sensors, y)
 part1 = interval_overlap(part1_intervals)

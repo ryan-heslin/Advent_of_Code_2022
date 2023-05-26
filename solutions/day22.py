@@ -1,8 +1,5 @@
 import re
 
-# real = x
-# imag = y
-
 strides = {"R": 1, "U": -1j, "L": -1, "D": 1j}
 directions = list(strides.keys())
 n_directions = len(directions)
@@ -46,9 +43,6 @@ def print_graph(graph):
 
 
 def rotate(x, change):
-    # current = directions.index(change)
-    # print(current)
-    # return directions[(current + 1 if directions == "L" else -1) % n_directions]
     if change == "L":  # counterclockwise
         x = complex(x.imag, -x.real)
     elif change == "R":
@@ -60,15 +54,8 @@ def traverse(graph, instructions, start, initial):
 
     current = start
     stride = initial
-    # breakpoint()
     for pair in instructions:
-        # if current == 8 + 8j:
-        #     breakpoint()
         steps = pair[0]
-        # next = current + stride * steps
-
-        # if next not in graph.keys() or next[graph] == 1:
-        # next = current
         for _ in range(steps):
             new = current + stride
             if new not in graph.keys():
@@ -86,13 +73,7 @@ def traverse_3d(graph, instructions, start, initial):
     current = start
     stride = initial
     for pair in instructions:
-        # if current == 8 + 8j:
-        #     breakpoint()
         steps = pair[0]
-        # next = current + stride * steps
-
-        # if next not in graph.keys() or next[graph] == 1:
-        # next = current
         for _ in range(steps):
             new = current + stride
             new_stride = stride
@@ -104,7 +85,6 @@ def traverse_3d(graph, instructions, start, initial):
             current = new
             stride = new_stride
         stride = rotate(stride, pair[1])
-        # print(stride)
     return current, stride
 
 
@@ -155,11 +135,7 @@ map_lines = map_lines.split("\n")
 instructions = instructions.rstrip("\n")
 instructions = parse_instructions(instructions)
 
-# Fill trailing direction
-# if instructions[-1][1] == "":
-#     instructions[-1] = (instructions[-1][0], instructions[-2][1])
-
-# Is it the example pattern or the real input
+# Is it the example pattern or the real input?
 graph, faces, pattern = parse_map(map_lines)
 start = min(graph.keys(), key=lambda coord: (coord.imag, coord.real))
 end, direction = traverse(graph, instructions, start, 1)
@@ -356,4 +332,3 @@ print(part1)
 end, direction = traverse_3d(graph, instructions, start, 1)
 part2 = int(password(end, direction))
 print(part2)
-# If

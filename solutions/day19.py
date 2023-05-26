@@ -75,12 +75,9 @@ def compute_geodes(costs, max_time):
     # Each state represennts *end* of minute
     while Q:
         current = Q.popleft()
-        # print(current)
-        # print("\n")
         # Takes minute to build, another before it starts working
         time_left = max_time - current["time"]
         assert time_left >= 0
-        # print(current)
         # Discard if no hope of beating best geodes
         if (
             current["geode"][1]

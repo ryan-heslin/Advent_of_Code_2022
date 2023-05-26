@@ -1,8 +1,5 @@
 from collections import defaultdict
 
-import numpy as np
-
-mask = np.zeros((15, 15))
 
 directions = {
     "R": lambda x: (x, 0),
@@ -22,22 +19,10 @@ adjacents = [
     [0, -1],
     [0, 0],
 ]
-# Tuple with index replaced with value
-def update_tuple(tupe, i, value):
-    return (x if j != i else value for j, x in enumerate(tupe))
 
 
 def l1(x, y):
     return sum(abs(xi - yi) for xi, yi in zip(x, y))
-
-
-def l2(x, y):
-    return (sum((xi - yi) ** 2 for xi, yi in zip(x, y))) ** (0.5)
-
-
-def clip(x):
-    absolute = abs(x)
-    return (absolute - 1) * (absolute / x)
 
 
 def parse(line):
@@ -67,15 +52,12 @@ class State:
             sign = -1 if target[dynamic_dimension] < self.head[dynamic_dimension] else 1
 
             self.head[dynamic_dimension] += sign
-            # print(f"New head: {self.head}")
-            # print(self.touched.keys())
-            # print("\n")
             offset[dynamic_dimension] -= sign
             new_distance = l1(self.head, self.tail)
 
             match (orig_distance, new_distance):
                 case (0, 1):
-                    self.advance(target, sign, static_dimension, dynamic_dimension)
+                    self.advance(target, sign, dynamic_dimension)
                     # Moving from same space
                 case (1, 0):
                     self.move(offset)  # Reversing direction, moving onto rope
@@ -89,7 +71,7 @@ class State:
                             self.head[dynamic_dimension] - sign
                         )
                         self.touched[tuple(self.tail)] += 1
-                        self.advance(target, sign, static_dimension, dynamic_dimension)
+                        self.advance(target, sign, dynamic_dimension)
                     else:
                         # else, adjacent ->diagonal
                         self.move(offset)
@@ -100,28 +82,19 @@ class State:
                     # Only case where tail changes row and column
                     self.tail[static_dimension] = self.head[static_dimension]
                     self.tail[dynamic_dimension] = self.head[dynamic_dimension] - sign
-                    # print(f"New tail: {self.tail}")
                     # One behind
                     self.touched[tuple(self.tail)] += 1
-                    self.advance(target, sign, static_dimension, dynamic_dimension)
+                    self.advance(target, sign, dynamic_dimension)
                 case _:
                     raise ValueError("Unexpected value")
 
-    def advance(self, target, sign, static_dimension, dynamic_dimension):
-
-        # Mark every coord touched by tail
+    def advance(self, target, sign, dynamic_dimension):
         temp = self.tail.copy()
         for i in range(self.head[dynamic_dimension], target[dynamic_dimension], sign):
             temp[dynamic_dimension] = i
             self.touched[tuple(temp)] += 1
         self.head[dynamic_dimension] = target[dynamic_dimension]
-        # print(f"New head: {self.head}")
-        # print(self.touched.keys())
-        self.tail[dynamic_dimension] = (
-            target[dynamic_dimension] - sign
-        )  # one behind; should be marked in loop
-        # print(f"New tail: {self.tail}")
-        # print("\n")
+        self.tail[dynamic_dimension] = target[dynamic_dimension] - sign
 
 
 class Rope:
@@ -155,12 +128,6 @@ class Rope:
 
         # else, find closest adjacent space to next link and move to it
 
-    def matrix(self):
-        matrix = mask
-        for i, coord in enumerate(self.knots):
-            matrix[int(coord[0]) + 5, int(coord[1]) + 5] = i
-        return matrix
-
     def move(self, offset):
         # breakpoint()
         target = [self.knots[0][0] + offset[0], self.knots[0][1] + offset[1]]
@@ -174,7 +141,6 @@ class Rope:
                 self.move_knot(self.knots[i - 1], self.knots[i])
 
             self.touched.add(tuple(self.knots[-1]))
-            # Mark position 9
 
 
 with open("inputs/day9.txt") as f:
@@ -187,7 +153,7 @@ first_state = State((0, 0), (0, 0))
 for line in processed:
     first_state.move(list(line))
 
-part1 = len(first_state.touched.keys())
+part1 = len(first_state.touched)
 print(part1)
 
 rope = Rope(knots=10)

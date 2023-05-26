@@ -97,3 +97,4 @@
 
 (define part-2 (badges raw-input 0))
 (display part-2)
+(display "\n")

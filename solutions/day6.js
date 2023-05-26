@@ -16,7 +16,7 @@ let end = 14;
 let part2_pattern = /^[a-z]*([a-z])[a-z]*\1[a-z]*$/
 let chars = raw_input.substring(start, end);
 
-while (part2_pattern.test(chars)){
+while (part2_pattern.test(chars)) {
     start++;
     end++;
     chars = raw_input.substring(start, end);

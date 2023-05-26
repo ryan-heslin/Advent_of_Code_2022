@@ -42,9 +42,6 @@ def decide(left, right):
 
 
 def compare(left, right):
-
-    # if isinstance(left, int) or isinstance(right, int):
-    #     breakpoint()
     if isinstance(left, int) and isinstance(right, int):
         return decide(left, right)
     elif isinstance(left, int):

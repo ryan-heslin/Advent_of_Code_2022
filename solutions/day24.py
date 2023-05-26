@@ -50,7 +50,6 @@ def advance_state(grid, height, width):
         if blizzard & 1:  # left/right
             new[complex(coord.real, (coord.imag + 1) % height)] += 8
 
-    # assert max(new.values()) < 16
     return new
 
 
@@ -140,4 +139,4 @@ part2 = part1 + stage2 + stage3
 print(f"First trip (part 1): {part1}")
 print(f"Return trip: {stage2}")
 print(f"Final trip: {stage3}")
-print(f"Total (part 2): {part2}")
+print(f"Total : {part2}")

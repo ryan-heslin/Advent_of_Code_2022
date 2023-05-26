@@ -13,23 +13,15 @@ def parse(line):
     return name, {"pressure": flow, "neighbors": neighbors}
 
 
-with open("inputs/day16.txt") as f:
-    raw_input = f.read().splitlines()
-map = dict(parse(line) for line in raw_input)
-start = "AA"
-
-# Node: time, activated, unactivated, pressure
-
-
-def floyd_warshall(map):
+def floyd_warshall(mapping):
     pairs = defaultdict(lambda: inf)
     # Direct connections
-    for node in map.keys():
+    for node in mapping.keys():
         pairs[(node, node)] = 0
-        for neighbor in map[node]["neighbors"]:
+        for neighbor in mapping[node]["neighbors"]:
             pairs[(node, neighbor)] = 1
 
-    all = map.keys()
+    all = mapping.keys()
     for i in all:
         for j in all:
             for k in all:
@@ -91,8 +83,12 @@ def explore(start, graph, pressures, start_time=30):
     return bests
 
 
-targets = {node for node, v in map.items() if v["pressure"] > 0}
-pairs = floyd_warshall(map)
+with open("inputs/day16.txt") as f:
+    raw_input = f.read().splitlines()
+mapping = dict(map(parse, raw_input))
+start = "AA"
+targets = {node for node, v in mapping.items() if v["pressure"] > 0}
+pairs = floyd_warshall(mapping)
 pairs = {
     source: dest
     for source, dest in pairs.items()
@@ -111,7 +107,7 @@ for el in pairs.items():
     else:
         graph[source][el[0][1]] = cost
 
-pressures = {k: map[k]["pressure"] for k in targets}
+pressures = {k: mapping[k]["pressure"] for k in targets}
 
 # Only paths to pressure nodes
 graph_reduced = {

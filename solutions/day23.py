@@ -84,17 +84,6 @@ def simulate(board, iterations, until_stable=False):
     return board
 
 
-# Get 8 neighbor tiles
-# If none occupied, break
-# Else for each direction:
-# If no elf in corresponding tiles
-# Add this elf and target tile to propositions
-# Else add target to overloaded
-
-# For elf, target in propositions:
-# Move elf to tile
-
-
 def count_empty(board):
     xmin = ymin = inf
     xmax = ymax = -inf

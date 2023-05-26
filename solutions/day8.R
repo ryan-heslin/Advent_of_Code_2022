@@ -22,7 +22,6 @@ score_all <- function(grid) {
         j <- coord[[2]]
         height <- coord[[3]]
         # TRBL order
-        # if (i == 4 && j == 4) browser()
         c(
             distance_to_obstruction(grid[seq(
                 from = 1,

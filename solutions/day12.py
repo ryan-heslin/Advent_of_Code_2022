@@ -72,7 +72,6 @@ dist = dijkstra(graph, goal)
 part1 = dist[start]
 print(part1)
 
-
 min_elevation = min(v.elevation for v in graph.values())
 part2 = min(v for k, v in dist.items() if graph[k].elevation == min_elevation)
 print(part2)

@@ -17,8 +17,9 @@ class Directory:
         self.files[file] = size
 
     def size(self):
-        total = sum(self.files.values())
-        return total + sum(dir.size() for dir in self.directories.values())
+        return sum(self.files.values()) + sum(
+            dir.size() for dir in self.directories.values()
+        )
 
     def __repr__(self):
         return f"""
