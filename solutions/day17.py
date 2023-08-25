@@ -9,7 +9,6 @@ def identical_states(x, y):
     return x["piece_i"] == y["piece_i"] and x["instruction_i"] == y["instruction_i"]
 
 
-# Broken because only compares state at indices, not state of surrounding pieces
 def find_cycle(states):
     for iteration, state in states.items():
         for second in range(iteration + 1, iterations - 2):
