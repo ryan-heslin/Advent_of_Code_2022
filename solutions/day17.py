@@ -5,30 +5,59 @@ from operator import attrgetter
 imag = attrgetter("imag")
 
 
+def identical_states(x, y):
+    return x["piece_i"] == y["piece_i"] and x["instruction_i"] == y["instruction_i"]
+
+
+# Broken because only compares state at indices, not state of surrounding pieces
 def find_cycle(states):
     for iteration, state in states.items():
-        for second in range(iteration + 1, iterations):
+        for second in range(iteration + 1, iterations - 2):
             if (
-                states[second]["piece_i"] == state["piece_i"]
-                and states[second]["instruction_i"] == state["instruction_i"]
+                (
+                    iteration > 0
+                    and identical_states(states[iteration - 1], states[second - 1])
+                )
+                and identical_states(state, states[second])
+                and identical_states(states[iteration + 1], states[second + 1])
             ):
                 period = second - iteration
+                second_state = states[second]
                 difference = states[second]["height"] - state["height"]
+                third = second + period
+                if third > iterations: 
+                    break
+                third_state = states[second + period]
+
+                if (
+                    states[third]["height"] - states[second]["height"]
+                                            == difference and
+                    (
+                        iteration > 0
+                        and identical_states(states[second - 1], states[third - 1])
+                    )
+                    and identical_states(second_state, third_state)
+                    and identical_states(states[second + 1], states[third + 1])
+                ):
+                    return iteration, period
                 for third in range(second + 1, iterations):
                     # Found a cycle
                     if (
-                        states[third]["piece_i"] == state["piece_i"]
-                        and states[third]["instruction_i"] == state["instruction_i"]
+                        identical_states(state, states[third])
                         and third - second == period
                         and states[third]["height"] - states[second]["height"]
                         == difference
                     ):
                         return iteration, period
-
+    return None, None
 
 def print_board(board, upper):
     for i in range(int(upper), -1, -1):
-        print("".join((str(board.get(complex(j, i), ".")) for j in range(-3, 4))))
+        print(
+            str(i)
+            + ": "
+            + "".join((str(board.get(complex(j, i), ".")) for j in range(-3, 4)))
+        )
 
 
 class Piece:
@@ -122,8 +151,6 @@ while iter < iterations:
 
     # Move until unable
     for move in instructions:
-        # print(current_piece)
-        # sleep(1)
         side_coords = [None] * this_size
         moved_side = False
         instruction_i += 1
@@ -159,7 +186,6 @@ while iter < iterations:
         current_piece = down_coords
 
     for coord in current_piece:
-        # assert coord not in board.keys()
         start = max(start, coord.imag + 4)
         board[coord] = 1
     states[iter] = {
@@ -175,7 +201,9 @@ while iter < iterations:
 part1 = int(states[target_iterations - 1]["height"])
 print(part1)
 
+# Period always 2781; detection is bugged
 cycle_start, period = find_cycle(states)
+assert cycle_start
 cycle_height = states[cycle_start + period]["height"] - states[cycle_start]["height"]
 bottom = states[cycle_start - 1]["height"]
 elephant_demand = 1000000000000
